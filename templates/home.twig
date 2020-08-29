@@ -1,0 +1,89 @@
+{% extends 'base.twig' %}
+
+{% block head %}
+  {{ parent() }}
+
+  <link rel="stylesheet" href="{{ base_url() }}/css/animate.min.css">
+{% endblock %}
+
+{% block title %}{{ titulo }}{% endblock %} 
+
+{% block navigation %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+	  {% include 'partes/nav-brand.twig' %}
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cartas de Porte</a>
+
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="{{ path_for('cartadeporte') }}">Carta de Porte</a>
+              <a class="dropdown-item" href="{{ path_for('cartadeporte.informe') }}">Informe</a>
+            </div>
+        </li>
+
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Procesos</a>
+
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Proceso</a>
+            <a class="dropdown-item" href="#">Informe</a>
+            <a class="dropdown-item" href="#">Informe resumido</a>
+            <a class="dropdown-item" href="#">Informe detallado</a>
+            <a class="dropdown-item" href="#">Movimiento depósito</a>
+            <a class="dropdown-item" href="#">Informe Mov. depósito</a>
+            <a class="dropdown-item" href="#">Informe stock en planta</a>
+            <a class="dropdown-item" href="#">Informe stock en depósito</a>
+            <a class="dropdown-item" href="#">Informe stock en silos</a>
+          </div>
+        </li>
+
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Firmas</a>
+
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{{ path_for('firmas') }}">Firmas</a>
+            <a class="dropdown-item" href="#">Informes</a>
+           </div>
+        </li>
+
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tablas</a>
+
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+    				<a class="dropdown-item" href="#">Lotes</a>
+    				<a class="dropdown-item" href="#">Tipo procesos</a>
+    				<a class="dropdown-item" href="#">Especies</a>
+    				<a class="dropdown-item" href="#">Envases</a>
+    				<a class="dropdown-item" href="#">Ubicaciones</a>
+    				<a class="dropdown-item" href="#">Silos</a>
+           </div>
+        </li>
+
+      </ul>   {# End navbar #}
+
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Usuario: {{ auth.user.Usuario }}</a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{{ path_for('login') }}">Salir</a>
+           </div>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <div class="tridimLogo animated rubberBand">
+    <img src="img/tridimLogo.png" alt="tridimLogo" width="100" height="100">
+  </div>
+{% endblock %}

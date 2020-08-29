@@ -1,0 +1,149 @@
+{% extends 'base.twig' %}
+
+{% block head %}
+	{{ parent() }}
+
+	<link rel="stylesheet" type="text/css" href="{{ base_url() }}/css/cp_informe.css">
+
+{% endblock %}	
+
+{% block title %} {{ titulo }} {% endblock %} 
+
+{% block navigation %}
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+
+		{% include 'partes/nav-brand.twig' %}
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+    	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+        	<ul class="navbar-nav mr-auto">
+			    <li class="nav-item active">
+		        	<a class="nav-link" href="{{ path_for('home') }}">Salir</a>
+			    </li>
+        	</ul>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block breadcrumbs %}
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Menú</a></li>
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Cartas de porte</a></li>
+						<li class="breadcrumb-item active" aria-current="page">Informe</li>
+					</ol>
+				</nav>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col" id="fondoComun">
+				<h2 class="text-right pr-4 font-weight-bold">Informe Cartas de Porte</h2>
+				<hr>
+
+
+				<div class="row bkgFiltroFecha">
+					<div class="col-2">
+						<p class="pFiltros font-weight-bold pt-3 text-center"><u>Filtros</u>:</p>
+					</div>
+					<div class="col-4">
+					    <label class="pt-1 mb-0" for="fechaDesde">Desde</label>                			
+					    <input type="date" class="form-control form-control-sm" id="fechaDesde" name="fechaDesde" value="{{ fechaDesde }}">
+					</div>
+					<div class="col-4">
+					    <label class="pt-1 mb-0" for="fechaDesde">Hasta</label>                			
+					    <input type="date" class="form-control form-control-sm" id="fechaHasta" name="fechaHasta" value="{{ fechaHasta }}">
+					</div>
+				</div>
+
+        		<div class="row bkgFiltroProd">
+					<div class="col-4 offset-2">
+						<label for="selProductor" class="pt-1 mb-0">Productor (Titular)</label>						
+						<select id="selProductor" name="selProductor" class="form-control form-control-sm">
+		        			<option value="0">Seleccione productor...</option>
+							{% for productor in productores %}
+								<option value="{{ productor.id }}">{{ productor.Nombre }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-4">
+						<label for="selDestino" class="pt-1 mb-0">Destino</label>
+						<select id="selDestino" name="selDestino" class="form-control form-control-sm">
+		        			<option value="0">Seleccione destino...</option>
+							{% for dest in destinos %}
+								<option value="{{ dest.CodLocDestino }}">{{ dest.LocDestino }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+
+				<div class="row bkgFiltroCereal">
+					<div class="col-3 offset-2">
+						<label for="selCereal" class="pt-1 mb-0">Cereal</label>
+						<select id="selCereal" name="selCereal" class="form-control form-control-sm">
+							<option value="0">Seleccione cereal...</option>
+							{% for cereal in cereales %}
+								<option value="{{ cereal.Codigo }}">{{ cereal.Descripcion }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-2">
+						<label for="selCampania" class="pt-1 mb-0">Campaña</label>
+						<select id="selCampania" name="selCampania" class="form-control form-control-sm">
+							<option value="0">Seleccione...</option>
+							{% for camp in campanias %}
+								<option value="{{ camp.Cosecha }}">{{ camp.Cosecha }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-3">
+						<label for="selTipo" class="pt-1 mb-0">Tipo CP</label>
+						<select id="selTipo" name="selTipo" class="form-control form-control-sm">
+							<option value="0">Seleccione...</option>
+							{% for tipo in tiposcp %}
+								<option value="{{ tipo.id }}">{{ tipo.tipo }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+
+		        <div class="row">
+		            <div class="col-6 offset-3 mt-4 mb-4">
+		                <a type="button" class="btn btn-success btn-block text-white" id="btnGenList" target="_blank">
+		                    <strong>Generar informe</strong>
+		                </a>
+		            </div>
+		        </div>  {# /.row #}
+
+			</div>		{# /.col #}	
+		</div>		{# /.row #}
+	</div>		{# /.container #}
+
+{% endblock %}
+
+{% block javascript %}
+	{{ parent() }}
+
+	{% set ver = '0.0.2' %}
+
+    <script type="text/javascript">
+    	// Paths
+    	var INFO = {
+			pathImprime: "{{ path_for('cartadeporte.informe.imprime') }}",
+		};
+
+    </script>
+	<script src="{{ base_url() }}/js-app/cartadeporte/informe.js?ver={{ ver }}"></script>
+
+{% endblock %}

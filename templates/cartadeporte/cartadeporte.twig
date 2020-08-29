@@ -1,0 +1,636 @@
+{% extends 'base.twig' %}
+
+{% block head %}
+	{{ parent() }}
+
+	<link rel="stylesheet" href="{{ base_url() }}/css/typeahead.css">
+	<link rel="stylesheet" href="{{ base_url() }}/css/toastr.min.css">
+	{# <link rel="stylesheet" href="{{ base_url() }}/css/cartadeporte.css"> #}
+
+	<style type="text/css">
+	  label, p.titulo {
+	  	padding-top: 4px !important;
+	  	margin-bottom: 2px !important;
+	  	margin-right: 12px !important;
+	  	font-size: 14px !important;
+	  }
+	  .chkProductor {
+	    margin-top: 28px !important;	
+	  }
+	  #btnDescargar {
+	  	height: 30px;
+	  	padding-top: 3px;
+	  	margin-bottom: 8px;
+	  	display: none;
+	  }
+	</style>
+
+{% endblock %}	
+
+{% block title %} {{ titulo }} {% endblock %} 
+
+{% block navigation %}
+	{% include 'cartadeporte/nav_cartadeporte.twig' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Menú</a></li>
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Cartas de porte</a></li>
+						<li class="breadcrumb-item active" aria-current="page">Carta de porte</li>
+					</ol>
+				</nav>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col" id="fondoComun">
+				<h2 class="text-right pr-4 font-weight-bold">Carta de Porte</h2>
+				<hr>					
+				<div class="row">
+					<div class="col-3">
+						<label for="numeroCp" class="font-weight-bold">Número Carta de Porte</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="numeroCp" name="numeroCp" placeholder="__________">
+					</div>
+					<div class="col-3">
+						<label for="tipoCarta">Tipo de Carta de Porte</label>
+ 						<select class="custom-select custom-select-sm" id="tipoCarta">
+ 							{% for tipo in tiposcp %}
+								<option value="{{ tipo.id }}">{{ tipo.tipo }}</option>
+						  	{% endfor %}
+						</select>
+					</div>
+						
+					<div id="#divBtnDesc" class="col-6 d-flex justify-content-end align-self-end">
+						<button id="btnDescargar" class="btn btn-secondary btn-sm">Descargar archivo Afip</button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-3">
+						<label for="nroCtg">C.T.G. Nro.</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="nroCtg" name="nroCtg">
+					</div>
+					<div class="col-3">
+						<label for="nroCee">C.E.E. Nro.</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="nroCee" name="nroCee">
+					</div>
+
+					<div class="col-3">
+						<label for="fechaCarga">Fecha de Carga</label>
+						<input type="date" class="form-control form-control-sm" id="fechaCarga" name="fechaCarga" value="{{ fechaCarga }}">
+					</div>
+					<div class="col-3">
+						<label for="fechaVenc">Fecha Vencimiento</label>
+						<input type="date" class="form-control form-control-sm" id="fechaVenc" name="fechaVenc" value="{{ fechaVenc }}">
+					</div>
+				</div>
+
+			<!-- 1. - INTERVINIENTES -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">1. - Intervinientes</h5>
+				</div>
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo"><strong>Titular</strong></p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selTitular">
+						  <option value="0" selected>Seleccione Titular...</option>
+						  {% for firma in productores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitTitular">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitTitular" name="cuitTitular">
+					</div>
+				</div>			
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Intermediario</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selInterm">
+						  <option value="0" selected>Seleccione Intermediario...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitInterm">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitInterm" name="cuitInterm">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Remitente Comercial</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selRemitCom">
+						  <option value="0" selected>Seleccione Remitente Comercial...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitRemitCom">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitRemitCom" name="cuitRemitCom">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Corredor Comprador</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selCorrComp">
+						  <option value="0" selected>Seleccione Corredor Comprador...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitCorrComp">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitCorrComp" name="cuitCorrComp">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Mercado a término</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selMercaTerm">
+						  <option value="0" selected>Seleccione Mercado a término...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitMercaTerm">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitMercaTerm" name="cuitMercaTerm">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Corredor Vendedor</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selCorrVend">
+						  <option value="0" selected>Seleccione Corredor Vendedor...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitCorrVend">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitCorrVend" name="cuitCorrVend">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Representante</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selRepresEnt">
+						  <option value="0" selected>Seleccione Representante...</option>
+						  {% for firma in entregadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitRepresEnt">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitRepresEnt" name="cuitRepresEnt">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Destinatario</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selDestinat">
+						  <option value="0" selected>Seleccione Destinatario...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitDestinat">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitDestinat" name="cuitDestinat">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Destino</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selDestino">
+						  <option value="0" selected>Seleccione Destino...</option>
+						  {% for firma in acopiadores %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitDestino">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitDestino" name="cuitDestino">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Intermediario Flete</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selIntermFlete">
+						  <option value="0" selected>Seleccione Intermediario Flete...</option>
+						  {% for firma in fleteros %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitIntermFlete">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitIntermFlete" name="cuitIntermFlete">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Transportista</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selTransport">
+						  <option value="0" selected>Seleccione Transportista...</option>
+						  {% for firma in fleteros %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitTransport">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitTransport" name="cuitTransport">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-2">
+						<p class="titulo">Chofer</p>
+					</div>
+					<div class="col-6">
+						<select class="custom-select custom-select-sm selectFirma" onchange="CARTA.selectFirma(this);" id="selChofer">
+						  <option value="0" selected>Seleccione Chofer...</option>
+						  {% for firma in choferes %}
+							  <option value="{{ firma.id }}" data-cuit="{{ firma.CUIT }}">{{ firma.Nombre }}</option>
+						  {% endfor %}
+						</select>
+					</div>
+					<div class="col-3 d-flex flex-row">
+						<label for="cuitChofer">CUIT</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cuitChofer" name="cuitChofer">
+					</div>
+				</div>
+
+			<!-- 2. - GRANOS / ESPECIE  -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">2. - Granos / Especie</h5>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="cosecha">Cosecha</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="cosecha" name="cosecha" placeholder="yy-yy">
+					</div>
+					<div class="col-3">
+						<label for="selGrano">Grano / Especie</label>
+ 						<select class="custom-select custom-select-sm selectFirma" id="selGrano">
+							<option value="0" selected>Seleccione Grano/Especie</option>
+							{% for cereal in cereales %}
+								<option value="{{ cereal.Codigo }}" data-tipo="{{ cereal.IdTipo }}">{{ cereal.Descripcion }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-3">
+						<label for="selTipoGrano">Tipo de grano</label>
+ 						<select class="custom-select custom-select-sm selectFirma" id="selTipoGrano">
+							<option value="00">Único</option>
+							<option value="01" selected>Duro</option>
+							<option value="02">Semiduro</option>
+						</select>
+					</div>
+					<div class="col-3">
+						<label for="contrato">Contrato número</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="contrato" name="contrato">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<div class="custom-control custom-checkbox custom-control-inline">
+							<input type="checkbox" class="custom-control-input" id="chkPesadoDest">
+  							<label class="custom-control-label" for="chkPesadoDest">Carga pesada en destino</label>
+						</div>
+					</div>
+					<div class="col-3">
+						<div class="custom-control custom-radio custom-control-inline">
+							<input type="radio" class="custom-control-input" id="radDeclaCalid" name="radCalidad" value="calidad">
+  							<label class="custom-control-label" for="radDeclaCalid">Declaración calidad</label>
+						</div>
+					</div>
+					<div class="col-3">
+						<div class="custom-control custom-radio custom-control-inline">
+							<input type="radio" class="custom-control-input" id="radConforme" name="radCalidad" value="conforme">
+  							<label class="custom-control-label" for="radConforme">Conforme</label>
+						</div>
+					</div>
+					<div class="col-3">
+						<div class="custom-control custom-radio custom-control-inline">
+							<input type="radio" class="custom-control-input" id="radCondicional" name="radCalidad" value="condic" checked="true">
+  							<label class="custom-control-label" for="radCondicional">Condicional</label>
+						</div>						
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="kgsEstimados">Kgs. Estimados</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="kgsEstimados" name="kgsEstimados">
+					</div>
+					<div class="col-3">
+						<label for="pesoBruto2">Peso bruto (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoBruto2" name="pesoBruto2">
+					</div>
+					<div class="col-3">
+						<label for="pesoTara2">Peso Tara (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoTara2" name="pesoTara2">
+					</div>
+					<div class="col-3">
+						<label for="pesoNeto2">Peso Neto (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoNeto2" name="pesoNeto2" readonly>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-12">
+						<label for="observac2">Observaciones</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="observac2" name="observac2">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<h6 class="text-center mt-3 mb-0 font-weight-bold">Procedencia de la mercadería</h6>
+						<hr class="mt-2 mb-1">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="establecim">Establecimiento</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="establecim" name="establecim">
+					</div>
+					<div class="col-3">
+						<label for="direccionProc">Dirección</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="direccionProc" name="direccionProc">
+					</div>
+					<div class="col-4">
+						<label for="localidadProc">Localidad</label>
+  						<input type="text" class="typeahead form-control form-control-sm mb-2" id="localidadProc" name="localidadProc" autocomplete="off" spellcheck="false" size="300px;">
+					</div>
+					<div class="col-2">
+						<label for="provinciaProc">Provincia</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="provinciaProc" name="provinciaProc">
+					</div>
+				</div>
+
+			<!-- 3. - DESTINO  -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">3. - Destino</h5>
+				</div>
+
+				<div class="row">
+					<div class="col-4">
+						<label for="direccionDest">Dirección</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="direccionDest" name="direccionDest">
+					</div>
+					<div class="col-4">
+						<label for="localidadDest">Localidad</label>
+  						<input type="text" class="typeahead form-control form-control-sm mb-2 mr-sm-2" id="localidadDest" name="localidadDest" autocomplete="off" spellcheck="false" size="300px;">
+					</div>
+					<div class="col-4">
+						<label for="provinciaDest">Provincia</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="provinciaDest" name="provinciaDest">
+					</div>
+				</div>
+
+			<!-- 4. - DATOS DEL TRANPORTE  -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">4. - Datos del transporte</h5>
+				</div>
+
+				<div class="row">
+					<div class="col-4">
+						<label for="pagadorFle">Pagador del flete</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="pagadorFle" name="pagadorFle">
+					</div>
+					<div class="col-4">
+						<label for="camion">Camión</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="camion" name="camion">
+					</div>
+					<div class="col-4">
+						<label for="acoplado">Acoplado</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="acoplado" name="acoplado">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-4">
+						<label for="kmsRecorrer">Kms. a recorrer</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="kmsRecorrer" name="kmsRecorrer">
+					</div>
+					<div class="col-4">
+						<label for="tarifaRef">Tarifa de referencia</label>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend mb-2">
+								<span class="input-group-text" id="inputGroup-sizing-sm">$</span>
+							</div>
+							<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="tarifaRef" name="tarifaRef" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+						</div>
+					</div>
+					<div class="col-4">
+						<label for="tarifa">Tarifa</label>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend mb-2">
+								<span class="input-group-text" id="inputGroup-sizing-sm">$</span>
+							</div>
+  							<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="tarifa" name="tarifa" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+  						</div>
+					</div>
+				</div>
+
+			<!-- 5. - DATOS A COMPLETAR EN LUGAR DE DESTINO Y DESCARGA -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">5. - Datos a completar en lugar de destino y descarga</h5>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="fechaArribo">Fecha de arribo</label>
+						<input type="date" class="form-control form-control-sm" id="fechaArribo" name="fechaArribo" value="{{ fechaArribo }}">
+					</div>
+					<div class="col-2">
+						<label for="horaArribo">Hora</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 inputRight" id="horaArribo" name="horaArribo">
+					</div>
+					<div class="col-1"></div>
+					<div class="col-3">
+						<label for="fechaDescarga">Fecha Descarga</label>
+						<input type="date" class="form-control form-control-sm" id="fechaDescarga" name="fechaDescarga" value="{{ fechaDescarga }}">
+					</div>
+					<div class="col-2">
+						<label for="horaDescarga">Hora</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 inputRight" id="horaDescarga" name="horaDescarga">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="turnoNro">Turno Número</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="turnoNro" name="turnoNro">
+					</div>
+					<div class="col-3">
+						<label for="pesoBruto5">Peso bruto (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoBruto5" name="pesoBruto5">
+					</div>
+					<div class="col-3">
+						<label for="pesoTara5">Peso Tara (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoTara5" name="pesoTara5">
+					</div>
+					<div class="col-3">
+						<label for="pesoNeto5">Peso Neto (Kgs.)</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="pesoNeto5" name="pesoNeto5" readonly>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-12">
+						<label for="observac5">Observaciones</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="observac5" name="observac5">
+					</div>
+				</div>
+
+			<!-- 6. - OTROS DATOS  -->
+				<div>
+					<hr>
+					<h5 class="font-weight-bold mb-2">6. - Otros datos... </h5>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						<label for="nroMuestra">Número de muestra</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 numero inputRight" id="nroMuestra" name="nroMuestra">
+					</div>
+					<div class="col-3">
+						<label for="humedad">Humedad</label>
+  						{# <input type="text" class="form-control form-control-sm mb-2 mr-sm-2 nroFloat inputRight" id="humedad" name="humedad"> #}
+
+						<div class="input-group input-group-sm mb-3">
+							<input type="text" class="form-control form-control-sm mb-2 nroFloat inputRight" id="humedad" name="humedad" aria-label="Humedad" aria-describedby="inputGroup-humedad-sm">
+							<div class="input-group-append mb-2">
+								<span class="input-group-text" id="inputGroup-humedad-sm">%</span>
+							</div>
+						</div>
+
+
+					</div>
+					<div class="col-3">
+						<label for="idLote">Id Lote</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 numero inputRight" id="idLote" name="idLote">
+					</div>
+					<div class="col-3">
+						<label for="idSilo">Id Silo</label>
+  						<input type="text" class="form-control form-control-sm mb-2 mr-sm-2 numero inputRight" id="idSilo" name="idSilo">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<hr>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-4 flex-row d-inline-flex">
+			  			<button id="btnConfirma" type="button" class="btn btn-primary btn-sm">Confirma</button>
+			  			<button id="btnCancela"  type="button" class="btn btn-secondary btn-sm ml-2">Cancela</button>
+				  	</div>
+					<div class="col-4">
+						{% include 'partes/spinnerGuardar.twig' %}
+					</div>
+				</div>
+
+				<form id="formCsrf">
+					{# Para CSRF control #}
+					{{ csrf.field | raw }}
+				</form>
+
+			</div> {#  /col container#}
+		</div> {# /row container #}
+	</div>  {# /container #}
+
+{% endblock %}
+
+{% block javascript %}
+	{{ parent() }}
+
+	{% set ver = '1.2.6' %}
+
+	<script src="{{ base_url() }}/js/jquery.inputmask.bundle.min.js"></script>
+	<script src="{{ base_url() }}/js/typeahead.bundle.min.js"></script>
+	<script src="{{ base_url() }}/js/toastr.min.js"></script>
+
+	<script src="{{ base_url() }}/js-app/enterXtab.js"></script>
+
+    <script type="text/javascript">
+    	// Paths
+    	var _pathLocalidades = "{{ path_for('cartadeporte.localidadesviaajax') }}",
+    		_pathGuardarCP   = "{{ path_for('cartadeporte.guardar') }}",
+    		_pathCartaPorte  = "{{ path_for('cartadeporte') }}";
+    		_pathBuscarCarta = "{{ path_for('cartadeporte.buscar') }}";
+    		_pathDatosCdP    = "{{ path_for('cartadeporte.datos', {'id': 0}) }}";
+
+	</script>
+
+	<script src="{{ base_url() }}/js-app/cartadeporte/setTypeahead.js?ver={{ ver }}"></script>
+	<script src="{{ base_url() }}/js-app/cartadeporte/validarform.js?ver={{ ver }}"></script>
+	<script src="{{ base_url() }}/js-app/cartadeporte/submitform.js?ver={{ ver }}"></script>
+	<script src="{{ base_url() }}/js-app/cartadeporte/cartadeporte.js?ver={{ ver }}"></script>
+	<script src="{{ base_url() }}/js-app/cartadeporte/fillform.js?ver={{ ver }}"></script>
+
+{% endblock %}
+

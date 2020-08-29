@@ -1,0 +1,231 @@
+{% extends 'base.twig' %}
+
+{% block head %}
+	{{ parent() }}
+
+	<link rel="stylesheet" href="{{ base_url() }}/css/typeahead.css">
+	<link rel="stylesheet" href="{{ base_url() }}/css/toastr.min.css">
+	{# <link rel="stylesheet" href="{{ base_url() }}/css/firmas.css"> #}
+
+	<style type="text/css">
+	  label {
+	  	padding-top: 4px !important;
+	  	margin-bottom: 2px !important;
+	  	margin-right: 12px !important;
+	  	font-size: 14px !important;
+	  }
+	  div.patentes {
+	  	display: none;
+	  }
+	</style>
+
+{% endblock %}	
+
+{% block title %} {{ titulo }} {% endblock %} 
+
+{% block navigation %}
+	{% include 'firmas/nav_firmas.twig' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Menú</a></li>
+						<li class="breadcrumb-item"><a href="{{ path_for('home') }}">Firmas</a></li>
+						<li class="breadcrumb-item active" aria-current="page">Firmas</li>
+					</ol>
+				</nav>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col" id="fondoComun">
+
+				<h2 class="text-right pr-4 font-weight-bold pr-4">Firmas</h2>
+				<hr class="mt-3 mb-2">
+
+				<form id="formFirmas" action="{{ path_for('firmas.guardar') }}" method="POST" autocomplete="off" novalidate>
+
+					<input type="hidden" id="id" name="id" value="0">
+
+				    <div class="form-group">
+				        <label for="ApellidoNombre">Nombre</label>
+				        <input type="text" class="form-control form-control-sm" id="Nombre" name="Nombre">
+				    </div>
+				    <div class="form-group">
+				        <label for="Fantasia">Nombre fantasía</label>
+				        <input type="text" class="form-control form-control-sm" id="Fantasia" name="Fantasia">
+				    </div>
+					<div class="form-row">
+						<div class="form-group col">
+					        <label for="Direccion">Dirección</label>
+					        <input type="text" class="form-control form-control-sm" id="Direccion" name="Direccion">
+						</div>
+						<div class="form-group col">
+					        <label for="Localidad">Localidad</label>
+					        <input type="text" class="typeahead form-control form-control-sm" id="Localidad" name="Localidad" autocomplete="off" spellcheck="false" size="300px;">
+						</div>
+						<div class="form-group col">
+					        <label for="Provincia">Provincia</label>
+					        <input type="text" class="form-control form-control-sm" id="Provincia" name="Provincia">
+						</div>
+					</div>
+
+					<input type="hidden" id="CodLoc" name="CodLoc">
+					<input type="hidden" id="CodProv" name="CodProv">
+
+					<div class="form-row">
+						<div class="form-group col">
+					        <label for="CodPostal">Código Postal</label>
+					        <input type="text" class="form-control form-control-sm" id="CodPostal" name="CodPostal">
+						</div>							
+						<div class="form-group col">
+					        <label for="Telefono">Teléfonos</label>
+					        <input type="text" class="form-control form-control-sm" id="Telefono" name="Telefono">
+						</div>
+						<div class="form-group col">
+					        <label for="Celular">Celulares</label>
+					        <input type="text" class="form-control form-control-sm" id="Celular" name="Celular">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col">
+					        <label for="CUIT">C.U.I.T.</label>
+					        <input type="text" class="form-control form-control-sm inputRight" id="CUIT" name="CUIT">
+						</div>
+						<div class="form-group col">
+							<label for="CondicionFiscal">Condición Fiscal</label>
+							<select class="form-control form-control-sm" id="CondicionFiscal" name="CondicionFiscal">
+								{% for condic in condFiscal %}
+									<option value="{{ condic }}"{{ (firma.CondicionFiscal == condic ) ? ' selected' : '' }}>{{ condic }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="form-group col-4">
+					        <label for="Email">Email</label>
+					        <input type="email" class="form-control form-control-sm" id="Email" name="Email">
+						</div>
+						<div class="form-group col">
+							<label for="Estado">Estado</label>
+							<select class="form-control form-control-sm" id="Estado" name="Estado">
+								<option value="Activo" selected>Activo</option>
+								<option value="Baja">Baja</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<h6 class="mt-1 mb-1 font-weight-bold">Tipo de firma:</h6>
+							<hr class="mt-2 mb-2">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<div class="custom-control custom-checkbox custom-control-inline">
+								<input type="checkbox" class="custom-control-input" id="Productor" name="Productor" value="1">
+  								<label class="custom-control-label" for="Productor">Productor</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="custom-control custom-checkbox custom-control-inline">
+								<input type="checkbox" class="custom-control-input" id="Acopio" name="Acopio" value="1">
+  								<label class="custom-control-label" for="Acopio">Acopio</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="custom-control custom-checkbox custom-control-inline">
+								<input type="checkbox" class="custom-control-input" id="Entregador" name="Entregador" value="1">
+  								<label class="custom-control-label" for="Entregador">Entregador</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="custom-control custom-checkbox custom-control-inline">
+								<input type="checkbox" class="custom-control-input" id="Fletero" name="Fletero" value="1">
+  								<label class="custom-control-label" for="Fletero">Fletero</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="custom-control custom-checkbox custom-control-inline">
+								<input type="checkbox" class="custom-control-input" id="Chofer" name="Chofer" value="1">
+  								<label class="custom-control-label" for="Chofer">Chofer</label>
+							</div>
+						</div>
+					</div>
+
+					<div class="patentes" id="patentes">
+						<div class="row">
+							<div class="col">
+								<hr class="mt-1 mb-1">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-3">
+								<label for="Chasis">Chasis</label>
+								<input type="text" class="form-control form-control-sm" id="Chasis" name="Chasis">
+							</div>							
+							<div class="form-group col-3">
+								<label for="Acoplado">Acoplado</label>
+								<input type="text" class="form-control form-control-sm" id="Acoplado" name="Acoplado">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col">
+							<hr class="mt-2 mb-4">
+						</div>
+					</div>
+
+					{# Para CSRF control #}
+					{{ csrf.field | raw }}
+
+					<div class="row">
+						<div class="col-4 d-inline-flex">
+				  			<button id="btnConfirma" type="submit" class="btn btn-primary btn-sm">Confirma</button>
+				  			<a id="btnCancela" class="btn btn-secondary btn-sm ml-2" href="{{ path_for('firmas') }}" role="button">Cancela</a>
+				  		</div>
+						<div class="col-4">
+
+							{% include 'partes/spinnerGuardar.twig' %}
+
+						</div>
+					</div>
+				</form>
+
+			</div> {# end col id='firmas' #} 
+		</div>   {# /row container #}
+	</div>    {# /container #}
+
+{% endblock %}
+
+{% block javascript %}
+	{{ parent() }}
+
+	<script src="{{ base_url() }}/js/jquery.inputmask.bundle.min.js"></script>
+	<script src="{{ base_url() }}/js/typeahead.bundle.min.js"></script>
+	<script src="{{ base_url() }}/js/toastr.min.js"></script>
+
+	<script src="{{ base_url() }}/js-app/enterXtab.js"></script>
+
+    <script type="text/javascript">
+    	// Paths
+    	var FIRMAS = {
+    		_pathLocalidades:  "{{ path_for('cartadeporte.localidadesviaajax') }}",
+    	    _pathGuardarFirma: "{{ path_for('firmas.guardar') }}",
+    	    _pathFirmas:       "{{ path_for('firmas') }}",
+    	    _pathBuscarFirma:  "{{ path_for('firmas.buscar') }}",
+    	    _pathGetFirma:     "{{ path_for('firmas.getfirma') }}",
+    	};
+	</script>
+
+	<script type="module" src="{{ base_url() }}/js-app/firmas/firmas.js?ver=1.0.6"></script>
+{% endblock %}
+
+
